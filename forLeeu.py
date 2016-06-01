@@ -13,44 +13,69 @@ import xml.etree.ElementTree as ET
 ROOT_PATH = 'Corpus'
 out_fn = "Corpus_%s" % time.strftime('%Y%m%d_%H%M%S')
 OUT_FILE = open(out_fn + '.txt', 'w')
-fname = "leeu.xml"
+fname = "NoNotesleeu.xml"
 writer = csv.writer(OUT_FILE, delimiter='\t')
 
+def process_text(p, text_id, text_type, sender, recipient, date, letter_id, lang):
+    for note in p.findall('note'):
+            p.remove(note)
+    for xref in p.findall('xref'):
+            p.remove(xref) 
+    clean = ET.tostring(p, encoding='utf8', method="text").decode().strip()
+    clean= re.sub((r'\n\s*|\s+'),' ',clean)
+    writer.writerow((text_id, clean, text_type, sender, recipient, date, letter_id, lang))
 
-def process_tei(el, out_file=OUT_FILE):
+
+def process_artifact(el, out_file=OUT_FILE):
+
     lang = ''
     sender = ''
     recipient = ''
+    letter_id = ''
     date = ''
+    text_type =''
+    text_id = 0
+    
 
     for interp in el.findall('interpGrp/interp'):
         if 'type' in interp.attrib:
-            type = interp.attrib['type']
+            interptype = interp.attrib['type']
+        if 'value' in interp.attrib:
             value = interp.attrib['value']
-            if type == 'language':
-                lang += value
-            if type == 'sender':
-                sender += value
-            if type == 'date':
-                date += value
-            if type == 'recipient':
-                recipient += value
-
-    for p in el.findall('div[@type="letter-page"]/p'): #in Huygens' corpus has to be just 'p'
         
-        for note in p.findall('note'):
-            p.remove(note)
-        for xref in p.findall('xref'):
-            p.remove(xref) 
-        clean = ET.tostring(p, encoding='utf8', method="text").decode().strip()
-        clean= re.sub((r'\n\s*|\s+'),' ',clean)
+            if interptype == 'id':
+                letter_id += value
+            if interptype == 'sender':
+                sender += value
+            if interptype == 'date':
+                date += value
+            if interptype == 'recipient':
+                recipient += value
+    for div in el.findall('div[@type="letter-page"]'):
+        if 'lang' in div.attrib:
+            lang = div.attrib['lang']
+        for p in div.findall('p'):
+            text_type = "body"
+            print(text_type)
+            print(p.text)
+            process_text(p, text_id, text_type, sender, recipient, date, letter_id, lang)
 
+
+    for div in el.findall('div[@type="letter-page"]/div'):
+        print("found subdiv")
+        if 'type' in div.attrib:
+            text_type = div.attrib['type']
+            print(text_type)
+           
+            for p in div.findall('p'):                    
+                process_text(p, text_id, text_type, sender, recipient, date, letter_id, lang)
+                    
+        
         # isolate punctuations?
         # add ID per sentence
         #sentences = re.split('(a-z|A-Z)(2)\.\s',clean)#I changed in order to avoid splitting on dots which do not end sentences
         #sentences = clean.split('. ')
         #for s in sentences:
-        writer.writerow((clean, sender, recipient, date, lang))
         #out_file.write("{0}\t{1}\t{2}\t{3}\t{4}\n".format(clean, sender, recipient, date, lang))
 
 
@@ -65,7 +90,7 @@ def process_xml(fname):
     input_root = input_tree.getroot()
     elements = input_root.findall('TEI.2/text/body/div[@subtype="artifact"]')
     for input_el in elements:
-        process_tei(input_el)
+        process_artifact(input_el)
 
 
 def main(argv=None):
