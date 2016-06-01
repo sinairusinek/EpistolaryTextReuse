@@ -17,7 +17,7 @@ fname = "leeu.xml"
 writer = csv.writer(OUT_FILE, delimiter='\t')
 
 
-def process_tei(el, out_file=OUT_FILE):
+def process_artifact(el, out_file=OUT_FILE):
     lang = ''
     sender = ''
     recipient = ''
@@ -36,12 +36,12 @@ def process_tei(el, out_file=OUT_FILE):
             if type == 'recipient':
                 recipient += value
 
-    for p in el.findall('div[@type="letter-page"]/p'): #in Huygens' corpus has to be just 'p'
-        
+    # in Huygens' corpus has to be just 'p'
+    for p in el.findall('div[@type="letter-page"]/p'):
         for note in p.findall('note'):
             p.remove(note)
         for xref in p.findall('xref'):
-            p.remove(xref) 
+            p.remove(xref)
         clean = ET.tostring(p, encoding='utf8', method="text").decode().strip()
         clean= re.sub((r'\n\s*|\s+'),' ',clean)
 
@@ -65,7 +65,7 @@ def process_xml(fname):
     input_root = input_tree.getroot()
     elements = input_root.findall('TEI.2/text/body/div[@subtype="artifact"]')
     for input_el in elements:
-        process_tei(input_el)
+        process_artifact(input_el)
 
 
 def main(argv=None):
