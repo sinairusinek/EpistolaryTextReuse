@@ -21,14 +21,13 @@ def process_text(p, text_id, text_type, sender, recipient, date, letter_id, lang
             p.remove(note)
     for xref in p.findall('xref'):
             p.remove(xref)
-    clean = ET.tostring(p, encoding='utf8', method="text").decode().strip()
+    clean = ET.tostring(p, encoding='utf-8', method="text").decode().strip()
     clean= re.sub((r'\n\s*|\s+'),' ',clean)
     writer.writerow((text_id, clean, text_type, sender, recipient, date, letter_id, lang))
 
 
 def process_artifact(el, out_file=OUT_FILE):
 
-def process_artifact(el, out_file=OUT_FILE):
     lang = ''
     sender = ''
     recipient = ''
@@ -67,7 +66,7 @@ def process_artifact(el, out_file=OUT_FILE):
             p.remove(note)
         for xref in p.findall('xref'):
             p.remove(xref)
-        clean = ET.tostring(p, encoding='utf8', method="text").decode().strip()
+        clean = ET.tostring(p, encoding='utf-8', method="text").decode().strip()
         clean= re.sub((r'\n\s*|\s+'),' ',clean)
     for div in el.findall('div[@type="letter-page"]/div'):
         print("found subdiv")
