@@ -2,4 +2,4 @@
 
 We're doing some testing.
 
-![Скриншот 2017-12-26 12.50.14](https://i.imgur.com/ddCCrrz.jpg)
+![IMG_20180117_164833](https://i.imgur.com/mqS8j4F.jpg)
